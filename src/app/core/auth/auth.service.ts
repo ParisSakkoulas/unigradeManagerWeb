@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { Role } from './role.enum';
 import { AuthState, AuthUser } from './auth-state.interface';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 const TOKEN_KEY = 'gm_token';
 

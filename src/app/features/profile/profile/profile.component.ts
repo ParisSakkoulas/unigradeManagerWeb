@@ -17,7 +17,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Role } from '../../../core/auth/role.enum';
 import { ToastService } from '../../../core/services/toast.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { StudentsService } from '../../students/students.service';
 import { InstructorsService } from '../../teachings/instructors.service';
 
