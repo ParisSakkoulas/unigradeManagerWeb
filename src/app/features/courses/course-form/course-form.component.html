@@ -1,0 +1,74 @@
+<div class="max-w-2xl mx-auto space-y-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <a routerLink="/courses" class="text-gray-400 hover:text-gray-600">
+      <!-- <svg
+        class="w-5 h-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg> -->
+
+
+    </a>
+
+    <span class="text-xl flex space-x-2 font-semibold text-gray-900 hover:cursor-pointer" routerLink="/courses">
+      <p>Courses</p>
+      <p>/</p>
+    </span>
+    <h1 class="text-xl font-semibold text-gray-900">
+      {{ isEdit ? "Edit course" : "New course" }}
+    </h1>
+  </div>
+
+  <!-- Form -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+      <div class="grid grid-cols-2 gap-4">
+        <app-input formControlName="code" label="Course code" placeholder="e.g. CS101" [required]="true"
+          [error]="fieldError('code')" />
+        <app-input formControlName="name" label="Course name" placeholder="e.g. Introduction to Programming"
+          [required]="true" [error]="fieldError('name')" />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">Description</label>
+        <textarea formControlName="description" rows="3" placeholder="Optional description..."
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500"></textarea>
+      </div>
+
+      <!-- Prerequisites multi-select -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">Prerequisites</label>
+        <div class="border border-gray-300 rounded-lg max-h-48 overflow-y-auto p-2 space-y-1">
+          <p *ngIf="allCourses.length === 0" class="text-sm text-gray-400 p-2">
+            No other courses available.
+          </p>
+          <label *ngFor="let c of allCourses"
+            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
+            <input type="checkbox" [value]="c._id" [checked]="isPrerequisite(c._id)"
+              (change)="togglePrerequisite(c._id)" class="rounded border-gray-300 text-blue-600" />
+            <span class="text-sm text-gray-700">{{ c.code }} — {{ c.name }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 pt-2">
+        <app-button variant="secondary" routerLink="/courses" type="button">
+          Back
+        </app-button>
+        <app-button type="submit" [loading]="saving">
+          {{ isEdit ? "Save changes" : "Create course" }}
+        </app-button>
+      </div>
+    </form>
+  </div>
+</div>

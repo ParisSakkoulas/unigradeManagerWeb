@@ -1,0 +1,9 @@
+<div
+  class="max-w-lg mx-auto mt-10 bg-white rounded-xl border border-gray-200 p-8 text-center"
+>
+  <h1 class="text-xl font-semibold text-gray-900">
+    Welcome, {{ auth.user()?.login }}
+  </h1>
+  <p class="mt-2 text-sm text-gray-500">Role: {{ auth.role() }}</p>
+  <p class="mt-1 text-sm text-gray-400">Dashboard — coming soon</p>
+</div>

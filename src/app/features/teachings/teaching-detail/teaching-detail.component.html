@@ -1,0 +1,191 @@
+<div class="max-w-2xl mx-auto space-y-6">
+  <!-- Back -->
+  <div class="flex items-center gap-3">
+    <a routerLink="/teachings" class="text-gray-400 hover:text-gray-600">
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </a>
+    <h1 class="text-xl font-semibold text-gray-900">Teaching detail</h1>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center py-16">
+    <app-spinner size="lg" />
+  </div>
+
+  <ng-container *ngIf="!loading && teaching">
+    <!-- Info card -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="text-xs text-gray-400 font-mono">
+            {{ teaching.course?.code }}
+          </p>
+          <h2 class="text-lg font-semibold text-gray-900">
+            {{ teaching.course?.name }}
+          </h2>
+          <p class="text-sm text-gray-500 mt-0.5">
+            {{ teaching.year }} · {{ teaching.semester | roleLabel }}
+          </p>
+        </div>
+        <span
+          class="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 text-blue-700"
+        >
+          {{ teaching.state | roleLabel }}
+        </span>
+      </div>
+
+      <!-- Instructor -->
+      <div>
+        <p class="text-xs font-medium text-gray-500 mb-1">Instructor</p>
+        <p class="text-sm text-gray-800">
+          {{
+            teaching.instructor
+              ? teaching.instructor.firstName +
+                " " +
+                teaching.instructor.lastName
+              : "—"
+          }}
+        </p>
+      </div>
+
+      <!-- Grading weights -->
+      <div *ngIf="teaching.theoryWeight !== null">
+        <p class="text-xs font-medium text-gray-500 mb-1">Grading weights</p>
+        <p class="text-sm text-gray-800">
+          Theory {{ (teaching.theoryWeight! * 100).toFixed(0) }}% · Lab
+          {{ (teaching.labWeight! * 100).toFixed(0) }}%
+        </p>
+        <p
+          *ngIf="teaching.theoryRetentionYear"
+          class="text-xs text-gray-400 mt-0.5"
+        >
+          Theory retained from {{ teaching.theoryRetentionYear }}
+        </p>
+        <p *ngIf="teaching.labRetentionYear" class="text-xs text-gray-400">
+          Lab retained from {{ teaching.labRetentionYear }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Admin actions -->
+    <div
+      *hasRole="[Role.ADMIN]"
+      class="bg-white rounded-xl border border-gray-200 p-6 space-y-4"
+    >
+      <h3 class="text-sm font-semibold text-gray-700">Admin actions</h3>
+
+      <!-- Assign instructor -->
+      <div *ngIf="teaching.state === TeachingState.ENTERED" class="space-y-3">
+        <p class="text-sm text-gray-500">
+          Assign an instructor to enable grading setup.
+        </p>
+        <div class="flex gap-3">
+          <select
+            [(ngModel)]="selectedInstructorId"
+            class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="">Select instructor...</option>
+            <option *ngFor="let i of instructors" [value]="i._id">
+              {{ i.firstName }} {{ i.lastName }} ({{ i.rank | roleLabel }})
+            </option>
+          </select>
+          <app-button [loading]="acting" (onClick)="assignInstructor()">
+            Assign
+          </app-button>
+        </div>
+      </div>
+
+      <!-- Expire semester -->
+      <div *ngIf="teaching.state === TeachingState.FULLY_GRADED">
+        <p class="text-sm text-gray-500 mb-3">
+          End the semester and reset this teaching.
+        </p>
+        <app-button
+          variant="danger"
+          [loading]="acting"
+          (onClick)="showExpire = true"
+        >
+          Expire semester
+        </app-button>
+      </div>
+    </div>
+
+    <!-- Instructor actions -->
+    <div
+      *hasRole="[Role.INSTRUCTOR, Role.ADMIN]"
+      class="bg-white rounded-xl border border-gray-200 p-6 space-y-4"
+    >
+      <h3 class="text-sm font-semibold text-gray-700">Instructor actions</h3>
+
+      <div class="flex flex-wrap gap-3">
+        <app-button
+          *ngIf="
+            teaching.state === TeachingState.ASSIGNED ||
+            teaching.state === TeachingState.GRADING_DEFINED
+          "
+          variant="secondary"
+          [routerLink]="['/teachings', teaching._id, 'grading']"
+        >
+          {{
+            teaching.state === TeachingState.GRADING_DEFINED
+              ? "Update grading"
+              : "Define grading"
+          }}
+        </app-button>
+
+        <app-button
+          *ngIf="teaching.state === TeachingState.PARTIALLY_GRADED"
+          variant="secondary"
+          [routerLink]="['/declarations']"
+          [queryParams]="{ teachingId: teaching._id }"
+        >
+          Enter grades
+        </app-button>
+
+        <app-button
+          *ngIf="teaching.state === TeachingState.PARTIALLY_GRADED"
+          variant="danger"
+          [loading]="acting"
+          (onClick)="showFinalize = true"
+        >
+          Finalize grades
+        </app-button>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<!-- Confirm finalize -->
+<app-confirm-dialog
+  [isOpen]="showFinalize"
+  title="Finalize grades"
+  message="Once finalized, grades cannot be modified. Are you sure?"
+  confirmLabel="Finalize"
+  confirmVariant="danger"
+  [loading]="acting"
+  (confirmed)="finalizeGrades()"
+  (cancelled)="showFinalize = false"
+/>
+
+<!-- Confirm expire -->
+<app-confirm-dialog
+  [isOpen]="showExpire"
+  title="Expire semester"
+  message="This will reset the teaching for next year. Are you sure?"
+  confirmLabel="Expire"
+  confirmVariant="danger"
+  [loading]="acting"
+  (confirmed)="expireSemester()"
+  (cancelled)="showExpire = false"
+/>

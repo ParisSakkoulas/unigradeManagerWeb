@@ -1,0 +1,106 @@
+<div class="max-w-xl mx-auto space-y-6">
+  <!-- Back -->
+  <div class="flex items-center gap-3">
+    <a
+      [routerLink]="['/teachings', teachingId]"
+      class="text-gray-400 hover:text-gray-600"
+    >
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </a>
+    <h1 class="text-xl font-semibold text-gray-900">Define grading</h1>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center py-16">
+    <app-spinner size="lg" />
+  </div>
+
+  <ng-container *ngIf="!loading && teaching">
+    <!-- Teaching info -->
+    <div class="bg-gray-50 rounded-xl border border-gray-200 px-5 py-4">
+      <p class="text-sm font-medium text-gray-800">
+        {{ teaching.course?.code }} — {{ teaching.course?.name }}
+      </p>
+      <p class="text-xs text-gray-500 mt-0.5">
+        {{ teaching.year }} · {{ teaching.semester }}
+      </p>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+        <div class="grid grid-cols-2 gap-4">
+          <app-input
+            formControlName="theoryWeight"
+            label="Theory weight (0–1)"
+            type="number"
+            placeholder="e.g. 0.7"
+            [required]="true"
+            [hint]="'e.g. 0.7 = 70%'"
+            [error]="fieldError('theoryWeight')"
+          />
+          <app-input
+            formControlName="labWeight"
+            label="Lab weight (0–1)"
+            type="number"
+            placeholder="e.g. 0.3"
+            [required]="true"
+            [hint]="'Must sum to 1 with theory'"
+            [error]="fieldError('labWeight')"
+          />
+        </div>
+
+        <!-- Weight sum validation -->
+        <p *ngIf="weightSumError" class="text-xs text-red-600">
+          Theory weight + Lab weight must equal 1.
+        </p>
+
+        <div class="grid grid-cols-2 gap-4">
+          <app-input
+            formControlName="theoryRetentionYear"
+            label="Theory retention year"
+            type="number"
+            placeholder="Optional, e.g. 2023"
+            [error]="fieldError('theoryRetentionYear')"
+          />
+          <app-input
+            formControlName="labRetentionYear"
+            label="Lab retention year"
+            type="number"
+            placeholder="Optional, e.g. 2023"
+            [error]="fieldError('labRetentionYear')"
+          />
+        </div>
+
+        <p class="text-xs text-gray-400">
+          Retention year: passing grades from that year onward are kept even if
+          the student re-takes the course.
+        </p>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <app-button
+            variant="secondary"
+            [routerLink]="['/teachings', teachingId]"
+            type="button"
+          >
+            Cancel
+          </app-button>
+          <app-button type="submit" [loading]="saving">
+            Save grading
+          </app-button>
+        </div>
+      </form>
+    </div>
+  </ng-container>
+</div>

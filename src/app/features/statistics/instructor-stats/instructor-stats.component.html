@@ -1,0 +1,65 @@
+<div class="space-y-6">
+  <h1 class="text-xl font-semibold text-gray-900">My statistics</h1>
+
+  <div *ngIf="loading" class="flex justify-center py-16">
+    <app-spinner size="lg" />
+  </div>
+
+  <ng-container *ngIf="!loading && stats">
+    <!-- Summary cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <app-stat-card
+        label="Total teachings"
+        [value]="stats.perTeaching.length"
+        icon="📚"
+        color="blue"
+      />
+      <app-stat-card
+        label="Total students"
+        [value]="stats.overall.totalStudents"
+        icon="👥"
+        color="purple"
+      />
+      <app-stat-card
+        label="Passed"
+        [value]="stats.overall.totalPassed"
+        icon="✓"
+        color="green"
+        trend="up"
+      />
+      <app-stat-card
+        label="Pass rate"
+        [value]="(stats.overall.passRate * 100).toFixed(1) + '%'"
+        icon="%"
+        color="blue"
+        [trend]="stats.overall.passRate >= 0.5 ? 'up' : 'down'"
+      />
+    </div>
+
+    <!-- Per-teaching pie charts -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div
+        *ngFor="let item of stats.perTeaching"
+        class="bg-white rounded-xl border border-gray-200 p-5"
+      >
+        <p class="text-sm font-medium text-gray-800 mb-1">
+          {{ item.teaching.course?.code }} — {{ item.teaching.course?.name }}
+        </p>
+        <p class="text-xs text-gray-400 mb-4">
+          {{ item.teaching.year }} · {{ item.teaching.semester }}
+        </p>
+        <p-chart
+          type="pie"
+          [data]="buildPieData(item.stats)"
+          [options]="pieOptions"
+          height="200"
+        />
+        <div class="mt-3 flex justify-around text-xs text-gray-600">
+          <span>Passed: {{ item.stats.passed }}</span>
+          <span>Failed: {{ item.stats.failed }}</span>
+          <span>Pending: {{ item.stats.pending }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,19 @@
+<p-card styleClass="h-full">
+  <div class="flex items-start gap-4">
+    <!-- Icon -->
+    <div
+      *ngIf="icon"
+      [ngClass]="iconWrapClasses"
+      class="rounded-lg p-2.5 shrink-0"
+    >
+      <span class="text-xl leading-none">{{ icon }}</span>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 min-w-0">
+      <p class="text-sm text-gray-500 truncate">{{ label }}</p>
+      <p class="mt-1 text-2xl font-semibold text-gray-900">{{ value }}</p>
+      <p *ngIf="sub" class="mt-0.5 text-xs" [ngClass]="subClasses">{{ sub }}</p>
+    </div>
+  </div>
+</p-card>

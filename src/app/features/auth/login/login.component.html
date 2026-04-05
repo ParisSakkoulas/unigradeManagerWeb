@@ -1,0 +1,60 @@
+<div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+  <div
+    class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8"
+  >
+    <!-- Header -->
+    <div class="mb-8 text-center">
+      <h1 class="text-2xl font-semibold text-gray-900">Sign in</h1>
+      <p class="mt-1 text-sm text-gray-500">Grade Manager</p>
+    </div>
+
+    <!-- Form -->
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      class="flex flex-col gap-5"
+    >
+      <app-input
+        formControlName="login"
+        label="Login"
+        placeholder="Enter your login"
+        [required]="true"
+        [error]="fieldError('login')"
+      />
+
+      <app-input
+        formControlName="password"
+        label="Password"
+        type="password"
+        placeholder="Enter your password"
+        [required]="true"
+        [error]="fieldError('password')"
+      />
+
+      <!-- General error -->
+      <p *ngIf="errorMsg" class="text-sm text-red-600 text-center">
+        {{ errorMsg }}
+      </p>
+
+      <app-button
+        type="submit"
+        [loading]="loading"
+        [fullWidth]="true"
+        class="mt-1"
+      >
+        Sign in
+      </app-button>
+    </form>
+
+    <!-- Footer -->
+    <p class="mt-6 text-center text-sm text-gray-500">
+      Don't have an account?
+      <a
+        routerLink="/auth/register"
+        class="text-blue-600 hover:underline font-medium"
+      >
+        Register
+      </a>
+    </p>
+  </div>
+</div>

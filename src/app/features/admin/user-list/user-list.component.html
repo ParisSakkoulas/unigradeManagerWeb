@@ -1,0 +1,85 @@
+<div class="space-y-6">
+  <h1 class="text-xl font-semibold text-gray-900">User management</h1>
+
+  <!-- Pending approvals -->
+  <div
+    *ngIf="pendingUsers.length > 0"
+    class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 space-y-3"
+  >
+    <p class="text-sm font-semibold text-yellow-800">
+      Pending approvals ({{ pendingUsers.length }})
+    </p>
+    <div class="space-y-2">
+      <div
+        *ngFor="let u of pendingUsers"
+        class="flex items-center justify-between bg-white rounded-lg border border-yellow-200 px-4 py-3"
+      >
+        <div>
+          <p class="text-sm font-medium text-gray-900">{{ u.login }}</p>
+          <p class="text-xs text-gray-500">
+            {{ u.role | roleLabel }} · Registered
+            {{ u.createdAt | date: "mediumDate" }}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <app-button
+            size="sm"
+            variant="primary"
+            [loading]="approvingId === u._id"
+            (onClick)="approve(u)"
+          >
+            Approve
+          </app-button>
+          <app-button size="sm" variant="danger" (onClick)="toDelete = u">
+            Reject
+          </app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All users table -->
+  <app-table
+    [columns]="columns"
+    [rows]="users"
+    [loading]="loading"
+    [hasActions]="true"
+    [actionsTemplate]="actions"
+    emptyMessage="No users found."
+  />
+</div>
+
+<!-- Actions template -->
+<ng-template #actions let-row>
+  <div class="flex justify-end gap-2">
+    <app-button
+      size="sm"
+      variant="secondary"
+      [routerLink]="['users', row._id, 'edit']"
+    >
+      Edit
+    </app-button>
+    <app-button
+      *ngIf="row.role !== Role.ADMIN"
+      size="sm"
+      variant="danger"
+      (onClick)="toDelete = row"
+    >
+      Delete
+    </app-button>
+  </div>
+</ng-template>
+
+<!-- Confirm delete -->
+<app-confirm-dialog
+  [isOpen]="!!toDelete"
+  title="Delete user"
+  [message]="
+    'Delete user &quot;' +
+    (toDelete?.login ?? '') +
+    '&quot;? This cannot be undone.'
+  "
+  [loading]="deleting"
+  (confirmed)="onDelete()"
+  (cancelled)="toDelete = null"
+/>

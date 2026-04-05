@@ -1,0 +1,87 @@
+<div class="space-y-4">
+
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900">
+      {{ isStudent ? 'My declarations' : 'Declarations' }}
+    </h1>
+    <app-button *hasRole="[Role.STUDENT, Role.ADMIN]" (onClick)="openDeclareModal()">
+      + Declare course
+    </app-button>
+  </div>
+
+  <app-table [columns]="columns" [rows]="declarations" [loading]="loading" [hasActions]="true"
+    [actionsTemplate]="actions" emptyMessage="No declarations found." />
+</div>
+
+<!-- Actions template -->
+<ng-template #actions let-row>
+  <div class="flex justify-end gap-2">
+
+    <ng-container *hasRole="[Role.STUDENT, Role.ADMIN]">
+      <app-button *ngIf="row.state === DeclarationState.PARTIAL" size="sm" variant="secondary"
+        (onClick)="confirmFinalize(row)">
+        Finalize
+      </app-button>
+      <app-button *ngIf="row.state === DeclarationState.PARTIAL" size="sm" variant="danger"
+        (onClick)="confirmUndeclare(row)">
+        Remove
+      </app-button>
+    </ng-container>
+
+    <ng-container *hasRole="[Role.INSTRUCTOR, Role.ADMIN]">
+      <app-button size="sm" variant="secondary" (onClick)="openGradeEntry(row)">
+        Grade
+      </app-button>
+    </ng-container>
+
+  </div>
+</ng-template>
+
+<!-- Declare course modal -->
+<app-modal [isOpen]="showDeclareModal" title="Declare a course" size="sm" [hasFooter]="true"
+  (closed)="showDeclareModal = false; selectedTeachingId = ''">
+  <div class="space-y-4">
+    <p class="text-sm text-gray-500">
+      Select an available teaching for this semester.
+    </p>
+
+    <div *ngIf="loadingTeachings" class="text-sm text-gray-400 text-center py-4">
+      Loading available courses…
+    </div>
+
+    <div *ngIf="!loadingTeachings && availableTeachings.length === 0" class="text-sm text-gray-400 text-center py-4">
+      No courses available to declare.
+    </div>
+
+    <div *ngIf="!loadingTeachings && availableTeachings.length > 0" class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-gray-700">Course</label>
+      <select [(ngModel)]="selectedTeachingId"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500">
+        <option value="">Select a course…</option>
+        <option *ngFor="let t of availableTeachings" [value]="t._id">
+          {{ t.course?.code }} — {{ t.course?.name }}
+          ({{ t.year }} · {{ semesterLabel(t.semester) }})
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div slot="footer" class="flex justify-end gap-3">
+    <app-button variant="secondary" (onClick)="showDeclareModal = false; selectedTeachingId = ''">
+      Cancel
+    </app-button>
+    <app-button [loading]="declaring" [disabled]="!selectedTeachingId" (onClick)="onDeclare()">
+      Declare
+    </app-button>
+  </div>
+</app-modal>
+
+<!-- Confirm undeclare -->
+<app-confirm-dialog [isOpen]="!!toUndeclare" title="Remove declaration"
+  message="Remove this course from your declaration?" confirmLabel="Remove" [loading]="acting"
+  (confirmed)="onUndeclare()" (cancelled)="toUndeclare = null" />
+
+<!-- Confirm finalize -->
+<app-confirm-dialog [isOpen]="!!toFinalize" title="Finalize declaration"
+  message="Once finalized you cannot add or remove courses. Continue?" confirmLabel="Finalize" confirmVariant="primary"
+  [loading]="acting" (confirmed)="onFinalize()" (cancelled)="toFinalize = null" />

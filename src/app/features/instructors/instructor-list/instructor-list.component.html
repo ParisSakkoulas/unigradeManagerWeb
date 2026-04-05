@@ -1,0 +1,43 @@
+<div class="space-y-4">
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900">Instructors</h1>
+    <app-button routerLink="new">+ New instructor</app-button>
+  </div>
+
+  <app-table
+    [columns]="columns"
+    [rows]="instructors"
+    [loading]="loading"
+    [hasActions]="true"
+    [clickable]="true"
+    [actionsTemplate]="actions"
+    emptyMessage="No instructors found."
+    (rowClick)="onRowClick($event)"
+  />
+</div>
+
+<ng-template #actions let-row>
+  <div class="flex justify-end gap-2">
+    <app-button size="sm" variant="secondary" [routerLink]="[row._id, 'edit']"
+      >Edit</app-button
+    >
+    <app-button size="sm" variant="danger" (onClick)="toDelete = row"
+      >Delete</app-button
+    >
+  </div>
+</ng-template>
+
+<app-confirm-dialog
+  [isOpen]="!!toDelete"
+  title="Delete instructor"
+  [message]="
+    'Delete ' +
+    (toDelete?.firstName ?? '') +
+    ' ' +
+    (toDelete?.lastName ?? '') +
+    '?'
+  "
+  [loading]="deleting"
+  (confirmed)="onDelete()"
+  (cancelled)="toDelete = null"
+/>

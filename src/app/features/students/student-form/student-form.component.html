@@ -1,0 +1,76 @@
+<div class="max-w-xl mx-auto space-y-6">
+  <div class="flex items-center gap-3">
+    <a routerLink="/students" class="text-gray-400 hover:text-gray-600">
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </a>
+    <h1 class="text-xl font-semibold text-gray-900">
+      {{ isEdit ? "Edit student" : "New student" }}
+    </h1>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+      <app-input
+        *ngIf="!isEdit"
+        formControlName="registrationNumber"
+        label="Registration number (AM)"
+        [required]="true"
+        [error]="fieldError('registrationNumber')"
+      />
+
+      <div class="grid grid-cols-2 gap-4">
+        <app-input
+          formControlName="firstName"
+          label="First name"
+          [required]="true"
+          [error]="fieldError('firstName')"
+        />
+        <app-input
+          formControlName="lastName"
+          label="Last name"
+          [required]="true"
+          [error]="fieldError('lastName')"
+        />
+      </div>
+
+      <app-input
+        formControlName="enrollmentYear"
+        label="Enrollment year"
+        type="number"
+        [required]="true"
+        [error]="fieldError('enrollmentYear')"
+      />
+
+      <app-input
+        *ngIf="!isEdit"
+        formControlName="userId"
+        label="User ID"
+        placeholder="Paste the user's _id"
+        [required]="true"
+        [error]="fieldError('userId')"
+        hint="Found in Admin → Users"
+      />
+
+      <div class="flex justify-end gap-3 pt-2">
+        <app-button variant="secondary" routerLink="/students" type="button"
+          >Cancel</app-button
+        >
+        <app-button type="submit" [loading]="saving">{{
+          isEdit ? "Save changes" : "Create"
+        }}</app-button>
+      </div>
+    </form>
+  </div>
+</div>

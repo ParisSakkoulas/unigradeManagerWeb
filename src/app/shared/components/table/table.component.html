@@ -1,0 +1,63 @@
+<p-table
+  [value]="loading ? skeletonRows : rows"
+  [columns]="columns"
+  [sortField]="sortKey"
+  [sortOrder]="sortDir === 'asc' ? 1 : -1"
+  [paginator]="rows.length > pageSize"
+  [rows]="pageSize"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  styleClass="p-datatable-sm p-datatable-striped p-datatable-gridlines"
+  (onSort)="onSortChange($event)"
+  [tableStyle]="{ 'min-width': '100%' }"
+>
+  <ng-template pTemplate="header" let-columns>
+    <tr>
+      <th
+        *ngFor="let col of columns"
+        [pSortableColumn]="col.sortable ? col.key : undefined"
+        [style.width]="col.width"
+        [ngClass]="alignClass(col.align)"
+      >
+        {{ col.label }}
+        <p-sortIcon *ngIf="col.sortable" [field]="col.key" />
+      </th>
+      <th *ngIf="hasActions" style="width: 8rem" class="text-right">Actions</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-row let-columns="columns">
+    <tr
+      [ngClass]="clickable ? 'cursor-pointer' : ''"
+      (click)="rowClick.emit(row)"
+    >
+      <td *ngFor="let col of columns" [ngClass]="alignClass(col.align)">
+        <p-skeleton *ngIf="loading" height="1.2rem" />
+        <ng-container *ngIf="!loading">
+          {{ col.render ? col.render(row) : row[col.key] }}
+        </ng-container>
+      </td>
+
+      <td *ngIf="hasActions && !loading" class="text-right">
+        <ng-container
+          *ngTemplateOutlet="actionsTemplate; context: { $implicit: row }"
+        />
+      </td>
+      <td *ngIf="hasActions && loading">
+        <p-skeleton height="1.2rem" />
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td
+        [attr.colspan]="columns.length + (hasActions ? 1 : 0)"
+        class="text-center text-gray-400 py-10"
+      >
+        {{ emptyMessage }}
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

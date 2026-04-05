@@ -1,0 +1,107 @@
+<div class="space-y-4">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900">Teachings</h1>
+    <app-button *hasRole="[Role.ADMIN]" (onClick)="showCreate = true">
+      + New teaching
+    </app-button>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-xl border border-gray-200 p-4">
+    <form [formGroup]="filterForm" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-gray-500">Year</label>
+        <input type="number" formControlName="year" placeholder="e.g. 2024"
+          class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500" />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-gray-500">Semester</label>
+        <select formControlName="semester"
+          class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500">
+          <option value="">All</option>
+          <option *ngFor="let s of semesters" [value]="s.value">{{ s.label }}</option>
+        </select>
+      </div>
+
+      <div class="flex items-end gap-2 col-span-2">
+        <app-button variant="secondary" (onClick)="resetFilters()">Reset</app-button>
+        <app-button (onClick)="load()">Apply</app-button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Table -->
+  <app-table [columns]="columns" [rows]="teachings" [loading]="loading"
+    [hasActions]="auth.isAdmin() || auth.isInstructor()" [clickable]="true" [actionsTemplate]="actions"
+    emptyMessage="No teachings found." (rowClick)="onRowClick($event)" />
+</div>
+
+<!-- Actions template -->
+<ng-template #actions let-row>
+  <div class="flex justify-end gap-2">
+    <ng-container *hasRole="[Role.ADMIN]">
+      <app-button *ngIf="row.state === TeachingState.ENTERED" size="sm" variant="secondary" [routerLink]="[row._id]">
+        Assign
+      </app-button>
+    </ng-container>
+
+    <ng-container *hasRole="[Role.INSTRUCTOR, Role.ADMIN]">
+      <app-button *ngIf="row.state === TeachingState.ASSIGNED || row.state === TeachingState.GRADING_DEFINED" size="sm"
+        variant="secondary" [routerLink]="[row._id, 'grading']">
+        Grading
+      </app-button>
+    </ng-container>
+
+    <app-button size="sm" variant="ghost" [routerLink]="[row._id]">
+      View
+    </app-button>
+  </div>
+</ng-template>
+
+<!-- Create teaching modal -->
+<app-modal [isOpen]="showCreate" title="New teaching" size="sm" [hasFooter]="true"
+  (closed)="showCreate = false; createForm.reset()">
+  <form [formGroup]="createForm" class="space-y-4">
+
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-gray-700">Course <span class="text-red-500">*</span></label>
+      <select formControlName="courseId"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500">
+        <option value="">Select course…</option>
+        <option *ngFor="let c of courses" [value]="c._id">
+          {{ c.code }} — {{ c.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-gray-700">Year <span class="text-red-500">*</span></label>
+      <input type="number" formControlName="year" placeholder="e.g. 2025"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500" />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-gray-700">Semester <span class="text-red-500">*</span></label>
+      <select formControlName="semester"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500">
+        <option value="">Select…</option>
+        <option *ngFor="let s of semesters" [value]="s.value">{{ s.label }}</option>
+      </select>
+    </div>
+
+  </form>
+
+  <div slot="footer" class="flex justify-end gap-3">
+    <app-button variant="secondary" (onClick)="showCreate = false; createForm.reset()">
+      Cancel
+    </app-button>
+    <app-button [loading]="creating" (onClick)="onCreate()">
+      Create
+    </app-button>
+  </div>
+</app-modal>

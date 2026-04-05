@@ -1,0 +1,22 @@
+<app-modal
+  [isOpen]="isOpen"
+  [title]="title"
+  size="sm"
+  [hasFooter]="true"
+  (closed)="cancelled.emit()"
+>
+  <p class="text-sm text-gray-600">{{ message }}</p>
+
+  <div slot="footer" class="flex justify-end gap-3">
+    <app-button variant="secondary" (onClick)="cancelled.emit()">
+      {{ cancelLabel }}
+    </app-button>
+    <app-button
+      [variant]="confirmVariant"
+      [loading]="loading"
+      (onClick)="confirmed.emit()"
+    >
+      {{ confirmLabel }}
+    </app-button>
+  </div>
+</app-modal>

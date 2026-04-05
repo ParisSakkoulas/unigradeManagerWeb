@@ -1,0 +1,88 @@
+<div class="max-w-4xl mx-auto space-y-6">
+  <!-- Back -->
+  <div class="flex items-center gap-3">
+    <a routerLink="/declarations" class="text-gray-400 hover:text-gray-600">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </a>
+    <h1 class="text-xl font-semibold text-gray-900">Grade entry</h1>
+  </div>
+
+  <div *ngIf="loadingTeaching" class="flex justify-center py-10">
+    <app-spinner size="lg" />
+  </div>
+
+  <ng-container *ngIf="!loadingTeaching && teaching">
+    <!-- Teaching info -->
+    <div class="bg-gray-50 rounded-xl border border-gray-200 px-5 py-4">
+      <p class="text-sm font-medium text-gray-800">
+        {{ teaching.course?.code }} — {{ teaching.course?.name }}
+      </p>
+      <p class="text-xs text-gray-500 mt-0.5">
+        {{ teaching.year }} · {{ teaching.semester }} · Theory
+        {{ (teaching.theoryWeight! * 100).toFixed(0) }}% / Lab
+        {{ (teaching.labWeight! * 100).toFixed(0) }}%
+      </p>
+    </div>
+
+    <!-- Tabs: single vs bulk -->
+    <div class="flex gap-2 border-b border-gray-200">
+      <button *ngFor="let tab of tabs" (click)="activeTab = tab.key" [ngClass]="
+          activeTab === tab.key
+            ? 'border-b-2 border-blue-600 text-blue-600 font-medium'
+            : 'text-gray-500 hover:text-gray-700'
+        " class="px-4 py-2 text-sm transition-colors -mb-px">
+        {{ tab.label }}
+      </button>
+    </div>
+
+    <!-- Single grade entry table -->
+    <div *ngIf="activeTab === 'single'">
+      <app-table [columns]="columns" [rows]="declarations" [loading]="loadingDeclarations" [hasActions]="true"
+        [actionsTemplate]="gradeActions" emptyMessage="No students declared this course." />
+    </div>
+
+    <!-- Bulk grade entry -->
+    <div *ngIf="activeTab === 'bulk'" class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+      <p class="text-sm text-gray-600">
+        Enter one grade per line:
+        <code class="bg-gray-100 px-1 rounded text-xs">AM,theory,lab</code> e.g.
+        <code class="bg-gray-100 px-1 rounded text-xs">CS2101,7.5,8.0</code>
+      </p>
+      <textarea [(ngModel)]="bulkText" rows="8" placeholder="CS2101,7.5,8.0&#10;CS2102,5.0,6.0"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500"></textarea>
+      <div class="flex justify-end gap-3">
+        <app-button variant="secondary" (onClick)="bulkText = ''">Clear</app-button>
+        <app-button [loading]="savingBulk" (onClick)="submitBulk()">
+          Import grades
+        </app-button>
+      </div>
+      <div *ngIf="bulkResult" class="text-sm rounded-lg p-3" [ngClass]="
+          bulkResult.notFound.length
+            ? 'bg-yellow-50 text-yellow-800'
+            : 'bg-green-50 text-green-800'
+        ">
+        Updated {{ bulkResult.updated }} records.
+        <span *ngIf="bulkResult.notFound.length">
+          Not found: {{ bulkResult.notFound.join(", ") }}
+        </span>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<!-- Inline grade edit per row -->
+<ng-template #gradeActions let-row>
+  <div class="flex items-center gap-2 justify-end">
+    <input type="number" min="0" max="10" step="0.5" placeholder="Theory" [value]="row.theoryGrade ?? ''"
+      (change)="onGradeChange(row, 'theory', $event)"
+      class="w-20 rounded border border-gray-300 px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-500" />
+    <input type="number" min="0" max="10" step="0.5" placeholder="Lab" [value]="row.labGrade ?? ''"
+      (change)="onGradeChange(row, 'lab', $event)"
+      class="w-20 rounded border border-gray-300 px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-500" />
+    <app-button size="sm" [loading]="savingId === row._id" (onClick)="saveGrade(row)">
+      Save
+    </app-button>
+  </div>
+</ng-template>

@@ -1,0 +1,85 @@
+<div class="max-w-xl mx-auto space-y-6">
+  <!-- Back -->
+  <div class="flex items-center gap-3">
+    <a routerLink="/admin" class="text-gray-400 hover:text-gray-600">
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </a>
+    <h1 class="text-xl font-semibold text-gray-900">Edit user</h1>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center py-16">
+    <app-spinner size="lg" />
+  </div>
+
+  <div *ngIf="!loading" class="bg-white rounded-xl border border-gray-200 p-6">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+      <app-input
+        formControlName="login"
+        label="Login"
+        [error]="fieldError('login')"
+      />
+
+      <app-input
+        formControlName="password"
+        label="New password"
+        type="password"
+        hint="Leave blank to keep current password"
+      />
+
+      <!-- Role selector -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">Role</label>
+        <select
+          formControlName="role"
+          class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-500"
+        >
+          <option *ngFor="let r of roleOptions" [value]="r.value">
+            {{ r.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Approval toggle -->
+      <div
+        class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
+      >
+        <div>
+          <p class="text-sm font-medium text-gray-700">Approved</p>
+          <p class="text-xs text-gray-400">User can log in when approved</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            formControlName="isApproved"
+            class="sr-only peer"
+          />
+          <div
+            class="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors"
+          ></div>
+          <div
+            class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"
+          ></div>
+        </label>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <app-button variant="secondary" routerLink="/admin" type="button">
+          Cancel
+        </app-button>
+        <app-button type="submit" [loading]="saving"> Save changes </app-button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<div
+  *ngIf="isOpen"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4"
+>
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/50" (click)="onBackdropClick()"></div>
+
+  <!-- Panel -->
+  <div
+    [ngClass]="panelClasses"
+    class="relative z-10 bg-white rounded-xl shadow-xl flex flex-col max-h-[90vh]"
+  >
+    <!-- Header -->
+    <div
+      class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0"
+    >
+      <h2 class="text-lg font-semibold text-gray-900">{{ title }}</h2>
+      <button
+        *ngIf="showClose"
+        type="button"
+        class="text-gray-400 hover:text-gray-600 transition-colors"
+        (click)="closed.emit()"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-6 py-4 overflow-y-auto flex-1">
+      <ng-content />
+    </div>
+
+    <!-- Footer -->
+    <div *ngIf="hasFooter" class="px-6 py-4 border-t border-gray-200 shrink-0">
+      <ng-content select="[slot=footer]" />
+    </div>
+  </div>
+</div>

@@ -1,0 +1,34 @@
+<div class="space-y-4">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900">Courses</h1>
+    <app-button *hasRole="[Role.ADMIN]" routerLink="new">
+      + New course
+    </app-button>
+  </div>
+
+  <!-- Search -->
+  <app-input [formControl]="searchCtrl" placeholder="Search by name or code..." type="search" />
+
+  <!-- Table -->
+  <app-table [columns]="columns" [rows]="courses" [loading]="loading" [hasActions]="isAdmin" [clickable]="true"
+    [actionsTemplate]="actions" emptyMessage="No courses found." (rowClick)="onRowClick($event)" />
+</div>
+
+<!-- Actions template -->
+<ng-template #actions let-row>
+  <div class="flex justify-end gap-2">
+    <app-button size="sm" variant="secondary" [routerLink]="[row._id, 'edit']">
+      Edit
+    </app-button>
+    <app-button size="sm" variant="danger" (onClick)="confirmDelete(row)">
+      Delete
+    </app-button>
+  </div>
+</ng-template>
+
+<!-- Confirm delete -->
+<app-confirm-dialog [isOpen]="!!courseToDelete" title="Delete course" [message]="
+    'Delete ' + (courseToDelete?.name ?? '') + '? This cannot be undone.'
+  " [loading]="deleting" (confirmed)="onDelete()" (cancelled)="courseToDelete = null" />
