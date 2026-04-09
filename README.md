@@ -242,4 +242,4 @@ API base URL: `https://unigrademanagerapi.onrender.com/api`
 
 ## License
 
-MIT
+This project was developed as a university assignment. All rights reserved.
